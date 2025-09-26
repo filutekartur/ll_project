@@ -25,7 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #SECRET_KEY = 'django-insecure-t$28e9kkozz!e^xfs5&+(%e-brn_bjze%k=(adrr@h%(1c)73n'
 SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+#DEBUG = True
+DEBUG = os.getenv("DEBUG") == "True"
+# os.getenv returns string, in python every string yield True, so thats why =="True"
 
 ALLOWED_HOSTS = ['filutekartur.pythonanywhere.com','127.0.0.1']
 
