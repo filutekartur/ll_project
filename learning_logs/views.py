@@ -9,22 +9,31 @@ def index(request):
     """The home page for Learning Log."""
     return render(request,'learning_logs/index.html')
 
-@login_required
 def topics(request):
     """Show all topics."""
-    topics = Topic.objects.filter(owner=request.user).order_by('date_added')
-    context = {'topics': topics}
+    topics = None
+    if request.user.is_authenticated:
+        topics = Topic.objects.filter(owner=request.user).order_by('date_added')
+        topics_pub = Topic.objects.filter(public=True).order_by('date_added').exclude(id__in=topics.values_list('id', flat=True))
+    else:
+        topics_pub = Topic.objects.filter(public=True).order_by('date_added')
+    context = {'topics': topics,'topics_pub': topics_pub}
     return render(request, 'learning_logs/topics.html', context)
 
-@login_required
+
 def topic(request, topic_id):
     """Show a single topic and all its entries."""
     topic = Topic.objects.get(id=topic_id)
     # Make sure the topic belongs to the current user.
-    check_topic_owner(topic.owner,request.user)
+    if not topic.public:
+        check_topic_owner(topic.owner,request.user)
+        public = False
+    else:
+        public = True if topic.owner!=request.user else False
     entries = topic.entry_set.order_by('-date_added')
-    context = {'topic': topic, 'entries': entries}
+    context = {'topic': topic, 'entries': entries, 'public': public}
     return render(request, 'learning_logs/topic.html', context)
+
 
 @login_required
 def new_topic(request):
